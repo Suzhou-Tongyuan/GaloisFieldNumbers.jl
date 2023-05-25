@@ -96,5 +96,5 @@ end
 
 # not exported
 @inline function conv(x::AbstractVector{GF}, y::AbstractVector{GF}) where {GF<:GFNumber}
-    return reverse(coeffs(Polynomial(reverse(x)) * Polynomial(reverse(y))))
+    return reverse(_patched_coeffs(Polynomial(reverse(x)) * Polynomial(reverse(y))))
 end

@@ -107,7 +107,7 @@ end
 function _naive_multiply(a::GF, b::GF) where {GF<:GFNumber}
     pa, pb = Polynomial(a), Polynomial(b)
     pp = Polynomial(_int2poly(ppoly(a))) # prime poly
-    pc = Polynomial(_naive_conv(coeffs(pa), coeffs(pb)))
+    pc = Polynomial(_naive_conv(_patched_coeffs(pa), _patched_coeffs(pb)))
     r = Polynomial{Int}(_naive_divrem(pc, pp)[2])
     return GF(r)
 end
@@ -164,7 +164,7 @@ end
 
 Base.convert(::Type{Polynomial}, x::GFNumber) = Polynomial(_int2poly(x.x))
 function Base.convert(::Type{T}, p::Polynomial) where {T<:GFNumber}
-    return T(_poly2int(coeffs(p)))
+    return T(_poly2int(_patched_coeffs(p)))
 end
 
 Polynomials.Polynomial(x::GFNumber) = convert(Polynomial, x)
@@ -181,3 +181,7 @@ end
 function _poly2int(coeffs::AbstractVector{<:Integer})
     return reduce((x, y) -> x * 2 + y, reverse(coeffs))
 end
+
+# Polynomials v3.2.9 changes the behavior of coeffs for zero polynomial
+# https://github.com/JuliaMath/Polynomials.jl/issues/503
+_patched_coeffs(x::Polynomial) = iszero(x) ? [zero(eltype(x))] : coeffs(x)
